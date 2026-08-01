@@ -1,0 +1,36 @@
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+ColumnLimit: 100
+
+LineEnding: LF
+
+ReflowComments: Always
+
+---
+Language: Cpp
+
+DerivePointerAlignment: false
+PointerAlignment: Right
+
+AlignArrayOfStructures: Right
+
+QualifierAlignment: Left
+
+PPIndentWidth: -1
+
+SeparateDefinitionBlocks: Always
+
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: true
+SpaceBeforeParens: ControlStatements
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: 1
+SpacesInParens: Never
+
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Empty
