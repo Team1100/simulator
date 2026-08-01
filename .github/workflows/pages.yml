@@ -1,0 +1,49 @@
+name: Build and Deploy Github Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: lukka/get-cmake@latest
+
+    - name: Setup emsdk
+      uses: emscripten-core/setup-emsdk@v15
+      with:
+        version: 6.0.3
+        actions-cache-folder: 'emsdk-cache'
+
+    - name: Prepare build directory
+      run: |
+        emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build static files
+      run: |
+        cmake --build build
+
+    - name: Upload static files
+      id: deployment
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: build/
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

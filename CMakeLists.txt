@@ -27,6 +27,9 @@ add_executable(simulator
 
 target_link_libraries(simulator sokol)
 
-set(CMAKE_EXECUTABLE_SUFFIX ".html")
+set_target_properties(simulator PROPERTIES
+	OUTPUT_NAME "index"
+	SUFFIX ".html"
+)
 target_link_options(simulator PRIVATE --shell-file ../web/index.html)
 target_link_options(simulator PRIVATE -sUSE_WEBGL2=1)

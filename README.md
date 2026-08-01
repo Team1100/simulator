@@ -32,4 +32,4 @@ threads to build with.
 
 ### Run the app
 
-`emrun build/simulator.html`
+`emrun build/index.html`
