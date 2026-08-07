@@ -22,10 +22,18 @@ target_include_directories(sokol INTERFACE sokol)
 
 target_link_libraries(sokol PUBLIC imgui)
 
+add_subdirectory(lua)
+
+set(SOL2_LUA_VERSION "5.4.8")
+set(SOL2_BUILD_LUA FALSE)
+add_subdirectory(sol2)
+
 add_executable(simulator
 	src/main.cxx)
 
 target_link_libraries(simulator sokol)
+target_link_libraries(simulator lua)
+target_link_libraries(simulator sol2::sol2)
 
 set_target_properties(simulator PROPERTIES
 	OUTPUT_NAME "index"
