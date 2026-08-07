@@ -15,6 +15,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+
     - uses: lukka/get-cmake@latest
 
     - name: Setup emsdk
