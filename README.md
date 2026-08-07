@@ -9,14 +9,15 @@ provided for building native apps.
 
 ## Dependencies
 
-Libraries used by the project are either provided by the system (Core libraries,
-OpenGL) or are included in the project tree (Sokol, DearImGui).
+Libraries used:
+- [sokol](https://github.com/floooh/sokol) for windowing, graphics, and more.
+- [DearImGui](https://github.com/ocornut/imgui) for debug immediate-mode UI
+- [Lua](https://www.lua.org/) for embedded scripting
+- [sol2](https://github.com/ThePhD/sol2) for a better way to use Lua
 
-CMake is used for building tooling.
-
-The Emscripten SDK is used as the web build toolchain. Install the
-[Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html) for
-your platform.
+Toolchain used:
+- [CMake](https://www.cmake.org/) for build system
+- [Emscripten](https://emscripten.org/) for targeting Web
 
 ## Build Instructions
 ### Prepare the build
