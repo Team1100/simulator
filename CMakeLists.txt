@@ -50,6 +50,10 @@ add_library(audio STATIC
 	audio/audio.cxx)
 target_include_directories(audio INTERFACE audio)
 
+add_library(entity STATIC
+	entity/entity.cxx)
+target_include_directories(entity INTERFACE entity)
+
 # GAME
 add_executable(simulator
 	src/main.cxx)
@@ -61,6 +65,9 @@ target_link_libraries(simulator PRIVATE sol2::sol2)
 target_link_libraries(simulator PRIVATE core)
 target_link_libraries(simulator PRIVATE render)
 target_link_libraries(simulator PRIVATE input)
+target_link_libraries(simulator PRIVATE fileaccess)
+target_link_libraries(simulator PRIVATE audio)
+target_link_libraries(simulator PRIVATE entity)
 
 set_target_properties(simulator PROPERTIES
 	OUTPUT_NAME "index"
