@@ -42,6 +42,10 @@ add_library(input STATIC
 	input/input.cxx)
 target_include_directories(input INTERFACE input)
 
+add_library(fileaccess STATIC
+	fileaccess/fileaccess.cxx)
+target_include_directories(fileaccess INTERFACE fileaccess)
+
 # GAME
 add_executable(simulator
 	src/main.cxx)
