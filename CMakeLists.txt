@@ -46,6 +46,10 @@ add_library(fileaccess STATIC
 	fileaccess/fileaccess.cxx)
 target_include_directories(fileaccess INTERFACE fileaccess)
 
+add_library(audio STATIC
+	audio/audio.cxx)
+target_include_directories(audio INTERFACE audio)
+
 # GAME
 add_executable(simulator
 	src/main.cxx)
