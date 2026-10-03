@@ -3,6 +3,7 @@ project(simulator)
 
 set(CMAKE_CXX_STANDARD 23)
 
+# EXTERNAL LIBS
 add_library(imgui STATIC
 	imgui/imgui.cpp
 	imgui/imgui_demo.cpp
@@ -28,12 +29,20 @@ set(SOL2_LUA_VERSION "5.4.8")
 set(SOL2_BUILD_LUA FALSE)
 add_subdirectory(sol2)
 
+# ENGINE LIBS
+add_library(core STATIC
+	core/core.cxx)
+target_include_directories(core INTERFACE core)
+
+# GAME
 add_executable(simulator
 	src/main.cxx)
 
-target_link_libraries(simulator sokol)
-target_link_libraries(simulator lua)
-target_link_libraries(simulator sol2::sol2)
+target_link_libraries(simulator PRIVATE sokol)
+target_link_libraries(simulator PRIVATE lua)
+target_link_libraries(simulator PRIVATE sol2::sol2)
+
+target_link_libraries(simulator PRIVATE core)
 
 set_target_properties(simulator PROPERTIES
 	OUTPUT_NAME "index"
