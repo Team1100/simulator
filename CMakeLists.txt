@@ -38,6 +38,10 @@ add_library(render STATIC
 	render/render.cxx)
 target_include_directories(render INTERFACE render)
 
+add_library(input STATIC
+	input/input.cxx)
+target_include_directories(input INTERFACE input)
+
 # GAME
 add_executable(simulator
 	src/main.cxx)
@@ -48,6 +52,7 @@ target_link_libraries(simulator PRIVATE sol2::sol2)
 
 target_link_libraries(simulator PRIVATE core)
 target_link_libraries(simulator PRIVATE render)
+target_link_libraries(simulator PRIVATE input)
 
 set_target_properties(simulator PROPERTIES
 	OUTPUT_NAME "index"
