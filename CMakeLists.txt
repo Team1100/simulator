@@ -54,6 +54,10 @@ add_library(entity STATIC
 	entity/entity.cxx)
 target_include_directories(entity INTERFACE entity)
 
+add_library(resources STATIC
+	resources/resources.cxx)
+target_include_directories(resources INTERFACE resources)
+
 # GAME
 add_executable(simulator
 	src/main.cxx)
@@ -68,6 +72,7 @@ target_link_libraries(simulator PRIVATE input)
 target_link_libraries(simulator PRIVATE fileaccess)
 target_link_libraries(simulator PRIVATE audio)
 target_link_libraries(simulator PRIVATE entity)
+target_link_libraries(simulator PRIVATE resources)
 
 set_target_properties(simulator PROPERTIES
 	OUTPUT_NAME "index"
