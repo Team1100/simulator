@@ -15,6 +15,10 @@
 
 #include "type/monad.hxx"
 
+#include "type/function.hxx"
+
 #include "type/memory.hxx"
+
+#include "type/container.hxx"
 
 #endif

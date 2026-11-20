@@ -1,3 +1,5 @@
+#include <print>
+
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include "sokol_glue.h"
@@ -7,12 +9,29 @@
 
 #include "sokol_imgui.h"
 
-#include "sol/sol.hpp"
+#include <sol/sol.hpp>
+
+#include <core/core.hxx>
+
+#include <render/render.hxx>
+
+#include "color.h"
+#include "test.h"
+
+using namespace core;
 
 // Holder of graphics state objects
-struct gfx_state_t {
-    sg_pass pass;
-} gfx;
+struct GfxState {
+    render::Framebuffer framebuffer;
+    render::Mesh color_mesh;
+    render::Mesh white_mesh;
+    render::Pipeline tex_pipeline;
+    render::Pipeline color_pipeline;
+    render::Image image;
+    render::Sampler sampler;
+};
+
+static Option<GfxState> gfx = {};
 
 // Holder of Lua + console state
 struct lua_state_t {
@@ -102,10 +121,25 @@ static void show_console() {
 }
 
 static void init(void) {
-    sg_desc gfx_desc{};
-    gfx_desc.environment = sglue_environment();
-    gfx_desc.logger.func = slog_func;
-    sg_setup(&gfx_desc);
+    if (Option<render::InitError> error = render::init()) {
+        std::println("[RENDER] Init Error: {}", (usize)error.value());
+        sapp_quit();
+        return;
+    }
+
+    gfx = std::move(GfxState{
+        .framebuffer = *render::Framebuffer::create({sapp_widthf(), sapp_heightf()}),
+        .color_mesh = *render::Mesh::create_quad(Vec3(-0.5f, -0.5f, 0), Vec2(1.f), true),
+        .white_mesh = *render::Mesh::create_quad(Vec3(-0.5f, -0.5f, 0), Vec2(1.f), false),
+        .tex_pipeline =
+            *render::Pipeline::create(PIPELINE_CREATE_ARGS(test, test, sg_query_backend())),
+        .color_pipeline =
+            *render::Pipeline::create(PIPELINE_CREATE_ARGS(color, color, sg_query_backend())),
+        .image = *render::Image::create_xor(),
+        .sampler =
+            *render::Sampler::create(render::Sampler::Filter::NEAREST,
+                                     render::Sampler::Border::BLACK, render::Sampler::Wrap::CLAMP),
+    });
 
     simgui_desc_t imgui_desc{};
     imgui_desc.logger.func = slog_func;
@@ -115,17 +149,12 @@ static void init(void) {
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-    gfx.pass = sg_pass{};
-    gfx.pass.action.colors[0] = {
-        .load_action = SG_LOADACTION_CLEAR,
-        .clear_value = {0.15f, 0.18f, 0.2f, 1.0f},
-    };
+    ImGui::GetIO().Fonts->AddFontDefaultVector();
+
     reset_lua_state();
 }
 
 static void frame(void) {
-    gfx.pass.swapchain = sglue_swapchain();
-
     simgui_frame_desc_t imgui_fdesc{
         .width = sapp_width(),
         .height = sapp_height(),
@@ -139,19 +168,50 @@ static void frame(void) {
 
     show_console();
 
-    sg_begin_pass(&gfx.pass);
-    simgui_render();
-    sg_end_pass();
-    sg_commit();
+    f32 t = sapp_frame_count() / 120.0f;
+    f32 st = sinf(t);
+    f32 ct = cosf(t);
+    Mat2 ar = Mat2(sapp_heightf() / sapp_widthf(), 0, 0, 1);
+
+    render::pass([=]() {
+        Mat4 rot_mvp = Mat4(ar * Mat2(ct, st, -st, ct));
+        gfx->color_pipeline.set_uniform(rot_mvp, "vs_params", "mvp");
+
+        render::draw(gfx->color_pipeline, gfx->color_mesh);
+
+        Mat4 scale_mvp = Mat4(ar * Mat2(st));
+        gfx->tex_pipeline.set_texture(gfx->image, "tex0");
+        gfx->tex_pipeline.set_sampler(gfx->sampler, "smp0");
+        gfx->tex_pipeline.set_uniform(scale_mvp, "vs_params", "mvp");
+
+        render::draw(gfx->tex_pipeline, gfx->white_mesh);
+
+        simgui_render();
+    });
+
+    render::present();
 }
 
 static void cleanup(void) {
     simgui_shutdown();
-    sg_shutdown();
+
+    gfx = {};
+
+    if (Option<render::CleanupError> error = render::cleanup()) {
+        std::println("[RENDER] Cleanup Error: {}", (usize)error.value());
+        sapp_quit();
+        return;
+    }
 }
 
 static void event(const sapp_event *event) {
     simgui_handle_event(event);
+    if (event->type == SAPP_EVENTTYPE_KEY_DOWN) {
+        if (event->modifiers & SAPP_MODIFIER_ALT && event->key_code == SAPP_KEYCODE_ENTER)
+            sapp_toggle_fullscreen();
+        if (event->modifiers & SAPP_MODIFIER_ALT && event->key_code == SAPP_KEYCODE_Q)
+            sapp_request_quit();
+    }
 }
 
 sapp_desc sokol_main(int argc, char **argv) {
@@ -162,11 +222,13 @@ sapp_desc sokol_main(int argc, char **argv) {
         .frame_cb = frame,
         .cleanup_cb = cleanup,
         .event_cb = event,
-        .width = 800,
-        .height = 600,
-        .sample_count = 4,
+        .width = 1920,
+        .height = 1080,
+        .sample_count = 1,
+        .high_dpi = true,
         .window_title = "Simulator",
         .icon = {.sokol_default = true},
         .logger = {.func = slog_func},
+        .html5 = {.ask_leave_site = true},
     };
 }
